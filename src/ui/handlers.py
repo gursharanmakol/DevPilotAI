@@ -27,14 +27,22 @@ def handle_approval(state: WorkflowState) -> WorkflowState:
         logger.exception("Error during approval.")
         raise
 
+
 def handle_feedback(state: WorkflowState) -> WorkflowState:
     try:
         workflow = Workflow(requirement=state.requirement)
         workflow.state = state
         result = workflow.run_review_only(feedback=state.feedback)
+
         result.next_step = "end"
-        logger.info(f"[handle_feedback] Revised user stories: {result['user_stories']}")
+
+        # 👇 FIX: ensure the result is a proper WorkflowState object
+        if not isinstance(result, WorkflowState):
+            result = WorkflowState(**result)
+
+        logger.info(f"[handle_feedback] Revised user stories: {getattr(result, 'user_stories', None)}")
         return result
+
     except Exception as e:
         logger.exception("Error during feedback processing.")
         raise
