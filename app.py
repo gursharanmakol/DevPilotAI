@@ -4,12 +4,14 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 import streamlit as st
+
 from src.state.workflow_state import WorkflowState
-from src.ui.components import requirement_input, product_owner_review
+from src.ui.requirement_input_ui import requirement_input
 from src.ui.handlers import handle_initial_workflow, handle_approval, handle_feedback
+from src.ui.product_owner_review_ui import product_owner_review
 from src.tools.logger import Logger
 
-logger = Logger("main")
+logger = Logger("app")
 
 try:
     if "workflow_state" not in st.session_state or st.session_state.workflow_state is None:
