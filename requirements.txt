@@ -1,0 +1,18 @@
+# Core LangChain and ecosystem
+langchain
+langchain-core
+langchain-community
+langgraph
+
+# Streamlit for UI
+streamlit
+
+# OpenAI API + Token counting
+openai
+tiktoken
+
+# Env + config handling
+python-dotenv
+PyYAML
+pydantic
+ 

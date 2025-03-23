@@ -1,0 +1,13 @@
+2025-03-22 23:21:18,828 - INFO - logger - Initial workflow run completed.
+2025-03-22 23:21:36,563 - INFO - logger - [handle_feedback] Revised user stories: As a product owner, I want to include a user story for assigning roles to different types of users (e.g., admin, support agent) in the development of the AI-powered chatbot for customer support.
+2025-03-22 23:32:30,896 - INFO - logger - Initial workflow run completed.
+2025-03-22 23:32:53,630 - ERROR - logger - Error during feedback processing.
+Traceback (most recent call last):
+  File "D:\AgentAIWorkshop-Projects\DevPilotAI\src\ui\handlers.py", line 36, in handle_feedback
+    logger.info(f"[handle_feedback] Revised user stories: {result.user_stories}")
+                                                           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AddableValuesDict' object has no attribute 'user_stories'
+2025-03-22 23:41:03,414 - INFO - logger - Initial workflow run completed.
+2025-03-22 23:41:20,768 - INFO - logger - [handle_feedback] Revised user stories: As a product owner, I want to create user stories for assigning roles to different types of users, such as admins and support agents, in the AI-powered chatbot for customer support.
+2025-03-23 08:13:35,690 - INFO - logger - Initial workflow run completed.
+2025-03-23 08:20:16,458 - INFO - logger - [handle_feedback] Revised user stories: As a product owner, I want to create user stories for assigning roles to different types of users, such as admin and support agent, in the AI-powered chatbot for customer support.
