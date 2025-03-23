@@ -106,7 +106,7 @@ def product_owner_review(state: WorkflowState, handle_approval, handle_feedback)
                         updated_state = handle_feedback(state)
 
                         # Confirm state is valid
-                        logger.info(f"[feedback_button] Updated state user stories = {updated_state.user_stories}")
+                        logger.info(f"[feedback_button] Updated state user stories = {updated_state["user_stories"]}")
 
                         if isinstance(updated_state, WorkflowState):
                             st.session_state.workflow_state = updated_state
