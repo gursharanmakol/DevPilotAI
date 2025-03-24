@@ -1,10 +1,11 @@
 import streamlit as st
-
 from src.state.workflow_state import WorkflowState
 from src.ui.components import render_section_heading, render_divider
 from src.tools.logger import Logger
+from src.services.product_owner_service import approve_user_stories, submit_feedback
 
 logger = Logger("product_owner_review_ui")
+
 
 def product_owner_review(state: WorkflowState, handle_approval, handle_feedback):
     if not state or not getattr(state, "user_stories", None):
@@ -20,12 +21,13 @@ def product_owner_review(state: WorkflowState, handle_approval, handle_feedback)
 
         render_section_heading("Step 2: Product Owner Review")
         render_section_heading("Approve or Provide Feedback")
+
         col1, col2 = st.columns(2)
 
         with col1:
             if st.button("✅ Approve User Stories"):
                 try:
-                    updated_state = handle_approval(st.session_state.workflow_state)
+                    updated_state = approve_user_stories(st.session_state.workflow_state, handle_approval)
                     st.session_state.workflow_state = updated_state
                     st.success("✅ User stories approved!")
                     logger.info("[product_owner_review] Approval handled successfully.")
@@ -35,26 +37,17 @@ def product_owner_review(state: WorkflowState, handle_approval, handle_feedback)
 
         with col2:
             feedback = st.text_area("Enter Feedback", value=state.feedback or "", height=120, key="feedback_input")
-            
+
             if st.button("✍️ Submit Feedback"):
                 try:
-                    feedback_text = feedback.strip() if isinstance(feedback, str) else ""
-                    if feedback_text:
-                        state.feedback = feedback_text
+                    updated_state = submit_feedback(state, feedback, handle_feedback)
 
-                        logger.info(f"[feedback_button] Submitting feedback = {feedback_text}")
-                        updated_state = handle_feedback(state)
-
-                        # Confirm state is valid
-                        logger.info(f"[feedback_button] Updated state user stories = {updated_state.user_stories}")
-
-                        if isinstance(updated_state, WorkflowState):
-                            st.session_state.workflow_state = updated_state
-                            st.session_state.workflow_state.feedback = ""
-                            st.rerun()
-                        else:
-                            st.error("Workflow state update failed. Unexpected return type.")
-
+                    if isinstance(updated_state, WorkflowState):
+                        st.session_state.workflow_state = updated_state
+                        st.session_state.workflow_state.feedback = ""
+                        st.rerun()
+                    else:
+                        st.error("Workflow state update failed. Unexpected return type.")
                 except Exception as e:
                     st.error("Feedback submission failed.")
                     st.exception(e)
