@@ -1,8 +1,12 @@
+import json
+
 import streamlit as st
+
 from src.state.workflow_state import WorkflowState
 from src.ui.components import render_section_heading, render_divider, render_labeled_text
 from src.tools.logger import Logger
 from src.services.requirement_service import generate_user_stories
+from src.components.user_story_renderer import render_user_stories
 
 logger = Logger("requirement_input_ui")
 
@@ -43,7 +47,7 @@ def render_requirement_input_area(container, state, handle_initial_workflow):
             if requirement.strip():
                 try:
                     state.requirement = requirement.strip()
-                    updated_state = generate_user_stories(state, handle_initial_workflow)
+                    updated_state = generate_user_stories(state.requirement, handle_initial_workflow)
                     if isinstance(updated_state, str):  # OpenAI returns plain text
                         structured = [{"user_story": updated_state.strip(), "acceptance_criteria": []}]
                         state.user_stories = structured
@@ -60,7 +64,6 @@ def render_requirement_input_area(container, state, handle_initial_workflow):
 
 
 def render_user_stories_column(container, state):
-
     with container:
         render_section_heading("Auto-Generated User Stories")
         workflow_state = st.session_state.get("workflow_state")
@@ -68,13 +71,6 @@ def render_user_stories_column(container, state):
 
         if not user_stories:
             st.info("Enter a requirement and click 'Generate User Stories' to see output.")
-        elif isinstance(user_stories, list):
-            for idx, story in enumerate(user_stories):
-                render_labeled_text(f"User Story {idx + 1}", story.get("user_story", ""))
-                st.markdown("**Acceptance Criteria:**")
-                for criterion in story.get("acceptance_criteria", []):
-                    st.markdown(f"- {criterion}")
-        elif isinstance(user_stories, str):
-            render_labeled_text("User Story", user_stories)
+        
         else:
-            st.warning("Unrecognized format for user stories.")
+            render_user_stories(user_stories)

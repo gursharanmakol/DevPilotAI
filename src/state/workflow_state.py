@@ -10,3 +10,8 @@ class WorkflowState(BaseModel):
     revisions: List[str] = Field(default_factory=list)
     review_attempts: int = 0
     next_step: Optional[str] = "review_user_stories"
+
+
+class UserStoryModel(BaseModel):
+    user_story: str
+    acceptance_criteria: List[str]

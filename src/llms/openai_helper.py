@@ -1,11 +1,13 @@
 # src/llms/openai_helper.py
-
 import os
+
 from openai import OpenAI
+
+from src.prompts.user_story_prompt import generate_user_story_prompt
+from src.prompts.revision_prompt import generate_revision_prompt
 from src.tools.logger import Logger
 
 logger = Logger("openai_helper")
-
 
 class OpenAIService:
     def __init__(self):
@@ -25,19 +27,11 @@ class OpenAIService:
             logger.info(f"Generating user story for: {requirement}")
 
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful product owner assistant who writes user stories and acceptance criteria."
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Generate user story and acceptance criteria for this requirement: {requirement}"
-                    }
-                ],
+                model="gpt-3.5-turbo-1106",
+                messages=generate_user_story_prompt(requirement),
+                response_format={"type": "json_object"},
                 temperature=0.7,
-                max_tokens=500
+                max_tokens=500,
             )
 
             content = response.choices[0].message.content.strip()
@@ -53,13 +47,11 @@ class OpenAIService:
         try:
             logger.info("Sending revised prompt to OpenAI.")
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You're a product owner updating user stories."},
-                    {"role": "user", "content": f"Original:\n{requirement}\n\nFeedback:\n{feedback}\n\nPlease revise."},
-                ],
+                model="gpt-3.5-turbo-1106",
+                messages=generate_revision_prompt(requirement, feedback),
+                response_format={"type": "json_object"},
                 temperature=0.7,
-                max_tokens=500
+                max_tokens=500,
             )
             content = response.choices[0].message.content.strip()
             logger.info("Received revised user story from OpenAI.")
