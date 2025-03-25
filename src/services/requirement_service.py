@@ -1,5 +1,7 @@
 from src.state.workflow_state import WorkflowState
 from src.state.workflow_state import UserStoryModel
+from src.utils.user_story_parser import parse_user_stories_from_llm_response
+
 from pydantic import ValidationError
 
 import logging
@@ -9,7 +11,7 @@ import json
 logger = logging.getLogger(__name__)
 
 
-def generate_user_stories(requirement: str, handler_func: Callable[[WorkflowState], WorkflowState]) -> WorkflowState:
+def handle_user_story_generation(state: WorkflowState, handler_func: Callable[[WorkflowState], WorkflowState]) -> WorkflowState:
     """
     Handles the user story generation from a requirement in the workflow state.
 
@@ -20,42 +22,17 @@ def generate_user_stories(requirement: str, handler_func: Callable[[WorkflowStat
     Returns:
         WorkflowState: Updated state with user stories populated.
     """
-    if not requirement:
+    if not state.requirement:
         raise ValueError("Requirement is missing in state.")
 
     try:
-        raw_response = handler_func(WorkflowState(requirement=requirement))
+        raw_response = handler_func(WorkflowState(requirement=state.requirement))
         if isinstance(raw_response, WorkflowState):
             return raw_response
 
-        try:
-   
-            parsed = json.loads(raw_response)
-            stories = parsed.get("user_stories", [])
-
-            # Normalize: wrap in list if it's a single dict
-            if isinstance(stories, dict):
-                logger.debug("LLM returned a single user story; wrapping it in a list.")
-                stories = [stories]
-
-            validated = [UserStoryModel(**story).model_dump() for story in stories]
-            return WorkflowState(requirement=requirement, user_stories=validated)
-
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON format returned by LLM.")
-            return WorkflowState(
-                requirement=requirement,
-                user_stories=[{
-                    "user_story": raw_response,
-                    "acceptance_criteria": []
-                }]
-            )
-
-        except ValidationError as ve:
-            logger.error(f"Pydantic validation failed - {ve}")
-            logger.debug(f"Error - LLM raw response: {raw_response}")
-            raise
+        validated = parse_user_stories_from_llm_response(raw_response)
+        return WorkflowState(requirement=state.requirement, user_stories=validated)
 
     except Exception as e:
-        logger.exception("Error generating user stories.")
+        logger.exception("Error generating user stories", exc_info=True)
         raise

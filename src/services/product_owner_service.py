@@ -1,7 +1,12 @@
-from src.state.workflow_state import WorkflowState
-
 import logging
+import json
 import re
+
+from src.state.workflow_state import WorkflowState
+from src.state.workflow_state import UserStoryModel
+from src.utils.user_story_parser import parse_user_stories_from_llm_response
+
+from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -36,31 +41,16 @@ def submit_feedback(state: WorkflowState, feedback: str, handle_feedback) -> Wor
     try:
         state.feedback = feedback
         logger.info(f"Submitting feedback: {feedback}")
-        updated_state = handle_feedback(state)
+        raw_response = handle_feedback(state)
 
-        # 🛡️ Ensure we retain structured format for user_stories
-        if isinstance(updated_state, str):
-            structured = parse_user_story_markdown(updated_state)
-            state.user_stories = structured
-            updated_state = state
-        elif isinstance(updated_state, WorkflowState):
-            # If updated_state.user_stories is a plain string, convert it
-            if isinstance(updated_state.user_stories, str):
-                updated_state.user_stories = [{
-                    "user_story": updated_state.user_stories.strip(),
-                    "acceptance_criteria": []
-                }]
-        if isinstance(updated_state.user_stories, list):
-            for story in updated_state.user_stories or []:
-                story.setdefault("acceptance_criteria", [])
-        else:
-            logger.warning("Unexpected type returned from handle_feedback.")
-            return state  # fallback
+        if isinstance(raw_response, WorkflowState):
+                return raw_response
 
-        return updated_state
+        validated = parse_user_stories_from_llm_response(raw_response)
+        return WorkflowState(requirement=state.requirement, user_stories=validated)
 
     except Exception as e:
-        logger.exception("Feedback submission failed.")
+        logger.exception("Error generating user stories", exc_info=True)
         raise
 
 

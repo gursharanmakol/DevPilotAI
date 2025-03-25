@@ -11,7 +11,7 @@ logger = Logger("user_story")
 def get_user_stories(requirement: str) -> str:
     try:
         ai_service = OpenAIService()
-        story = ai_service.generate_user_stories(requirement)
+        story = ai_service.call_llm_for_user_stories(requirement)
         logger.info("AI-generated user story successfully.")
         return story
 

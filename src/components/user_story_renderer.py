@@ -2,13 +2,14 @@ import json
 
 import streamlit as st
 
-def render_user_stories(user_stories):
+def render_user_stories(user_stories, debug=False):
     """
     Render user stories and acceptance criteria from a JSON string or dict.
     """
 
-    st.write("🧪 Type of user_stories:", type(user_stories))
-    st.json(user_stories)
+    if debug:
+        st.write("🧪 Type of user_stories:", type(user_stories))
+        st.json(user_stories)
 
     try:
         if isinstance(user_stories, str):

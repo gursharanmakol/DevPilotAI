@@ -1,4 +1,4 @@
-def generate_revision_prompt(requirement: str, user_story: str, feedback: str) -> list[dict]:
+def generate_revision_prompt(requirement: str, feedback: str) -> list[dict]:
     return [
         {
             "role": "system",
@@ -13,8 +13,6 @@ def generate_revision_prompt(requirement: str, user_story: str, feedback: str) -
             Revise the following user story based on the feedback.
 
             Requirement: {requirement}
-
-            User Story: {user_story}
 
             Feedback: {feedback}
 

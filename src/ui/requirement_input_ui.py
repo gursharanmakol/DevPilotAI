@@ -5,7 +5,7 @@ import streamlit as st
 from src.state.workflow_state import WorkflowState
 from src.ui.components import render_section_heading, render_divider, render_labeled_text
 from src.tools.logger import Logger
-from src.services.requirement_service import generate_user_stories
+from src.services.requirement_service import handle_user_story_generation
 from src.components.user_story_renderer import render_user_stories
 
 logger = Logger("requirement_input_ui")
@@ -47,7 +47,7 @@ def render_requirement_input_area(container, state, handle_initial_workflow):
             if requirement.strip():
                 try:
                     state.requirement = requirement.strip()
-                    updated_state = generate_user_stories(state.requirement, handle_initial_workflow)
+                    updated_state = handle_user_story_generation(state, handle_initial_workflow)
                     if isinstance(updated_state, str):  # OpenAI returns plain text
                         structured = [{"user_story": updated_state.strip(), "acceptance_criteria": []}]
                         state.user_stories = structured

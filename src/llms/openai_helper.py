@@ -22,7 +22,7 @@ class OpenAIService:
             logger.exception(f"Failed to initialize OpenAI client: {e}")
             raise
 
-    def generate_user_stories(self, requirement: str) -> str:
+    def call_llm_for_user_stories(self, requirement: str) -> str:
         try:
             logger.info(f"Generating user story for: {requirement}")
 
