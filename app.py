@@ -24,8 +24,10 @@ try:
 
     state = requirement_input(state, handle_initial_workflow)
 
-    if state and state.user_stories:
+    if hasattr(state, "user_stories") and state.user_stories:
         state = product_owner_review(state, handle_approval, handle_feedback)
+    else:
+        logger.warning("Skipping Product Owner Review: no user stories found.")
 
 except Exception as e:
     logger.exception("Unexpected error in main Streamlit app:")
