@@ -1,7 +1,7 @@
 from functools import wraps
-from src.tools.logger import Logger
+from src.utils.logger import Logger
 
-logger = Logger("node_trace")
+logger = Logger(__name__)
 
 def log_node(func):
     @wraps(func)

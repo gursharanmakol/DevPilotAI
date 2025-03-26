@@ -1,12 +1,11 @@
 import streamlit as st
 from src.state.workflow_state import WorkflowState
 from src.ui.components import render_section_heading, render_divider
-from src.tools.logger import Logger
-from src.services.product_owner_service import approve_user_stories, submit_feedback
+from src.utils.logger import Logger
+from src.handlers.product_owner_service import approve_user_stories, submit_feedback
 from src.ui.requirement_input_ui import render_user_stories_column
 
-logger = Logger("product_owner_review_ui")
-
+logger = Logger(__name__)
 
 def product_owner_review(state: WorkflowState, handle_approval, handle_feedback):
     if not state or not getattr(state, "user_stories", None):

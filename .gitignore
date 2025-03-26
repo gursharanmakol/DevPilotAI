@@ -6,3 +6,4 @@ logs/
 # Ignore Python cache files
 __pycache__/
 *.py[cod]
+.mypy_cache/

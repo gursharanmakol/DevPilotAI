@@ -1,17 +1,16 @@
-import json
+# src/ui/requirement_input_ui.py
 
 import streamlit as st
 
 from src.state.workflow_state import WorkflowState
 from src.ui.components import render_section_heading, render_divider, render_labeled_text
-from src.tools.logger import Logger
-from src.services.requirement_service import handle_user_story_generation
+from src.utils.logger import Logger
+from src.handlers.requirement_service import handle_user_story_generation
 from src.components.user_story_renderer import render_user_stories
 
-logger = Logger("requirement_input_ui")
+logger = Logger(__name__)
 
-
-def requirement_input(state: WorkflowState, handle_initial_workflow):
+def requirement_input(state: WorkflowState, handle_initial_workflow) -> WorkflowState | None:
     if not validate_state(state):
         return None
 
@@ -28,7 +27,7 @@ def requirement_input(state: WorkflowState, handle_initial_workflow):
         return state
 
 
-def validate_state(state):
+def validate_state(state: WorkflowState | None) -> bool:
     if not isinstance(state, WorkflowState):
         logger.error(f"Expected WorkflowState but got {type(state)}")
         st.error("Invalid workflow state detected.")
@@ -40,20 +39,17 @@ def validate_state(state):
     return True
 
 
-def render_requirement_input_area(container, state, handle_initial_workflow):
+def render_requirement_input_area(container, state: WorkflowState, handle_initial_workflow) -> None:
     with container:
-        requirement = st.text_area("Requirement", value=getattr(state, "requirement", ""), height=150)
-        if st.button("Generate User Stories"):
+        requirement = st.text_area("Requirement", value=state.requirement or "", height=150)
+        if st.button("Generate User Stories", key="generate_button"):
             if requirement.strip():
                 try:
                     state.requirement = requirement.strip()
-                    updated_state = handle_user_story_generation(state, handle_initial_workflow)
-                    if isinstance(updated_state, str):  # OpenAI returns plain text
-                        structured = [{"user_story": updated_state.strip(), "acceptance_criteria": []}]
-                        state.user_stories = structured
-                        updated_state.user_stories = structured  # Update the updated state as well
-                    else:
-                        state.user_stories = updated_state.user_stories
+                    with st.spinner("Generating user stories..."):
+                        updated_state = handle_user_story_generation(state, handle_initial_workflow)
+
+                    state.user_stories = updated_state.user_stories
                     logger.info("User stories successfully generated.")
                 except Exception as e:
                     logger.exception("Failed to generate user stories.")
@@ -63,11 +59,10 @@ def render_requirement_input_area(container, state, handle_initial_workflow):
                 st.warning("Please enter a valid requirement.")
 
 
-def render_user_stories_column(container, state):
+def render_user_stories_column(container, state: WorkflowState) -> None:
     with container:
         render_section_heading("Auto-Generated User Stories")
-        workflow_state = st.session_state.get("workflow_state")
-        user_stories = getattr(workflow_state, "user_stories", None) if workflow_state else None
+        user_stories = getattr(state, "user_stories", None)
 
         if not user_stories:
             st.info("Enter a requirement and click 'Generate User Stories' to see output.")

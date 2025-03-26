@@ -1,3 +1,5 @@
+# /src/handlers/requirement_service.py
+
 from src.state.workflow_state import WorkflowState
 from src.state.workflow_state import UserStoryModel
 from src.utils.user_story_parser import parse_user_stories_from_llm_response
@@ -11,13 +13,13 @@ import json
 logger = logging.getLogger(__name__)
 
 
-def handle_user_story_generation(state: WorkflowState, handler_func: Callable[[WorkflowState], WorkflowState]) -> WorkflowState:
+def handle_user_story_generation(state: WorkflowState, llm_handler: Callable[[WorkflowState], WorkflowState]) -> WorkflowState:
     """
     Handles the user story generation from a requirement in the workflow state.
 
     Args:
         requirement (str): The software requirement text to process.
-        handler_func (function): Function to process the workflow and return updated state.
+        llm_handler (function): Function to process the workflow and return updated state.
 
     Returns:
         WorkflowState: Updated state with user stories populated.
@@ -26,7 +28,7 @@ def handle_user_story_generation(state: WorkflowState, handler_func: Callable[[W
         raise ValueError("Requirement is missing in state.")
 
     try:
-        raw_response = handler_func(WorkflowState(requirement=state.requirement))
+        raw_response = llm_handler(WorkflowState(requirement=state.requirement))
         if isinstance(raw_response, WorkflowState):
             return raw_response
 

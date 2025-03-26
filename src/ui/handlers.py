@@ -1,8 +1,8 @@
 from src.graph.workflow import Workflow
 from src.state.workflow_state import WorkflowState
-from src.tools.logger import Logger
+from src.utils.logger import Logger
 
-logger = Logger("handlers")
+logger = Logger(__name__)
 
 def handle_initial_workflow(state: WorkflowState) -> WorkflowState:
     try:
@@ -18,7 +18,7 @@ def handle_initial_workflow(state: WorkflowState) -> WorkflowState:
 def handle_approval(state: WorkflowState) -> WorkflowState:
     try:
         state.user_story_status = "Approved"
-        workflow = Workflow(requirement=state.requirement)
+        workflow = Workflow(requirement=(state.requirement or ""))
         workflow.state = state
         result = workflow.run_review_only()
         logger.info("User stories approved and workflow advanced.")
@@ -30,7 +30,7 @@ def handle_approval(state: WorkflowState) -> WorkflowState:
 
 def handle_feedback(state: WorkflowState) -> WorkflowState:
     try:
-        workflow = Workflow(requirement=state.requirement)
+        workflow = Workflow(requirement=(state.requirement or ""))
         workflow.state = state
         result = workflow.run_review_only(feedback=state.feedback)
 

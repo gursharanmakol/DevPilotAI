@@ -9,7 +9,7 @@ from src.state.workflow_state import WorkflowState
 from src.ui.requirement_input_ui import requirement_input
 from src.ui.handlers import handle_initial_workflow, handle_approval, handle_feedback
 from src.ui.product_owner_review_ui import product_owner_review
-from src.tools.logger import Logger
+from src.utils.logger import Logger
 
 logger = Logger("app")
 

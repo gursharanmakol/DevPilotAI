@@ -1,9 +1,10 @@
+# /src/handlers/product_owner_service.py
+
 import logging
 import json
 import re
 
 from src.state.workflow_state import WorkflowState
-from src.state.workflow_state import UserStoryModel
 from src.utils.user_story_parser import parse_user_stories_from_llm_response
 
 from pydantic import ValidationError

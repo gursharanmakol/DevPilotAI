@@ -3,10 +3,9 @@ import json
 import re
 
 from src.llms.openai_helper import OpenAIService
-from src.tools.logger import Logger
+from src.utils.logger import Logger
 
-logger = Logger("user_story")
-
+logger = Logger(__name__)
 
 def get_user_stories(requirement: str) -> str:
     try:

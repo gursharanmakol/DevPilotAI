@@ -1,18 +1,18 @@
-# Core LangChain and ecosystem
+# LangGraph & LangChain (working set from pip freeze)
+langgraph
 langchain
 langchain-core
 langchain-community
-langgraph
 
-# Streamlit for UI
-streamlit
-
-# OpenAI API + Token counting
-openai>=1.3.7
+# OpenAI + Token Counting
+openai
 tiktoken
 
-# Env + config handling
+# Streamlit UI
+streamlit
+
+# Environment + Config
 python-dotenv
 PyYAML
 pydantic
- 
+

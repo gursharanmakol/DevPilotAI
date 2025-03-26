@@ -1,13 +1,13 @@
 # src/llms/openai_helper.py
 import os
 
-from openai import OpenAI
+from openai import OpenAI  # type: ignore
 
 from src.prompts.user_story_prompt import generate_user_story_prompt
 from src.prompts.revision_prompt import generate_revision_prompt
-from src.tools.logger import Logger
+from src.utils.logger import Logger
 
-logger = Logger("openai_helper")
+logger = Logger(__name__)
 
 class OpenAIService:
     def __init__(self):
@@ -23,39 +23,41 @@ class OpenAIService:
             raise
 
     def call_llm_for_user_stories(self, requirement: str) -> str:
-        try:
-            logger.info(f"Generating user story for: {requirement}")
-
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo-1106",
-                messages=generate_user_story_prompt(requirement),
-                response_format={"type": "json_object"},
-                temperature=0.7,
-                max_tokens=500,
-            )
-
-            content = response.choices[0].message.content.strip()
-            logger.info("Received user story content from OpenAI.")
-            return content
-
-        except Exception as e:
-            logger.exception(f"Failed to generate user stories from OpenAI: {e}")
-            raise
+        messages = generate_user_story_prompt(requirement)
+        return self._call_openai_chat(messages, context="generate user stories")
 
 
     def revise_user_stories(self, requirement: str, feedback: str) -> str:
+        messages = generate_revision_prompt(requirement, feedback)
+        return self._call_openai_chat(messages, context="revise user stories")
+
+
+    def _call_openai_chat(self, messages: list[dict], context: str) -> str:
+        """
+        Internal helper to call OpenAI's chat completion API.
+        
+        Args:
+            messages (list): Chat prompt messages.
+            context (str): Used for logging (e.g., "generate user story", "revise").
+
+        Returns:
+            str: Content string from OpenAI response.
+        """
         try:
-            logger.info("Sending revised prompt to OpenAI.")
+            logger.info(f"Calling OpenAI to {context}...")
+
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo-1106",
-                messages=generate_revision_prompt(requirement, feedback),
+                messages=messages,
                 response_format={"type": "json_object"},
                 temperature=0.7,
                 max_tokens=500,
             )
+
             content = response.choices[0].message.content.strip()
-            logger.info("Received revised user story from OpenAI.")
+            logger.info(f"Received OpenAI response for {context}.")
             return content
+
         except Exception as e:
-            logger.exception("Failed to revise user stories.")
+            logger.exception(f"Failed to {context} via OpenAI.")
             raise
