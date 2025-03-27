@@ -5,6 +5,8 @@ from openai import OpenAI  # type: ignore
 
 from src.prompts.user_story_prompt import generate_user_story_prompt
 from src.prompts.revision_prompt import generate_revision_prompt
+from src.prompts.design_doc_prompt import generate_design_doc_prompt
+from src.prompts.code_generation_prompt import generate_code_generation_prompt
 from src.utils.logger import Logger
 
 logger = Logger(__name__)
@@ -30,6 +32,16 @@ class OpenAIService:
     def revise_user_stories(self, requirement: str, feedback: str) -> str:
         messages = generate_revision_prompt(requirement, feedback)
         return self._call_openai_chat(messages, context="revise user stories")
+    
+
+    def call_llm_for_design_doc(self, requirement: str, user_stories: str) -> str:
+        messages = generate_design_doc_prompt(requirement, user_stories)
+        return self._call_openai_chat(messages, context="generate design doc")
+
+
+    def call_llm_for_code_generation(self, design_doc: str) -> str:
+        messages = generate_code_generation_prompt(design_doc)
+        return self._call_openai_chat(messages, context="generate code")
 
 
     def _call_openai_chat(self, messages: list[dict], context: str) -> str:
